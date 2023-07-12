@@ -81,21 +81,22 @@ func (f expFloat64) Add(n Number) Number {
 	case expFloat64:
 		n2 := n.(expFloat64)
 		alignExp := f.exp
-		if n2.exp > f.exp {
+		if n2.exp < f.exp {
 			alignExp = n2.exp
 		}
 		v1 := f.val
 		if alignExp < f.exp {
-			v1 *= math.Pow(10, float64(alignExp-f.exp))
+			v1 *= math.Pow(10, float64(-alignExp+f.exp))
 		}
 		v2 := n2.val
 		if alignExp < n2.exp {
-			v2 *= math.Pow(10, float64(alignExp-n2.exp))
+			v2 *= math.Pow(10, float64(-alignExp+n2.exp))
 		}
-		return expFloat64{
+		z := expFloat64{
 			exp: alignExp,
 			val: v1 + v2,
 		}
+		return z
 	}
 	panic("invalid type")
 }
