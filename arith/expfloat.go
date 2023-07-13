@@ -7,6 +7,9 @@ import (
 
 const ExpUnit = 4
 
+var SmallBoarder = 0.0001
+var LargeBoarder = 1e15
+
 // expFloat64 number = val * 10 ^ exp, inner implement, not used by user
 type expFloat64 struct {
 	val float64
@@ -62,13 +65,19 @@ func (f *expFloat64) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	if v.Exponent() > -ExpUnit {
-		f.exp = 0
-		f.val = v.InexactFloat64()
+	rawV := v.InexactFloat64()
+	if rawV != 0 && (math.Abs(rawV) < SmallBoarder || math.Abs(rawV) > LargeBoarder) {
+		digitNum := math.Log10(math.Abs(rawV))
+
+		f.exp = int32(digitNum) / ExpUnit * ExpUnit
+		if digitNum > 2*ExpUnit {
+			f.exp -= 2 * ExpUnit
+		}
+		f.val = v.Shift(-f.exp).InexactFloat64()
 		return nil
 	}
-	f.exp = (v.Exponent() / ExpUnit) * ExpUnit
-	f.val = v.Shift(-f.exp).InexactFloat64()
+	f.exp = 0
+	f.val = rawV
 	return nil
 }
 
@@ -120,11 +129,11 @@ func (f expFloat64) Mul(n Number) Number {
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(n2) * f.val
-		return FitFloat64(r, f.exp)
+		return fitFloat64(r, f.exp)
 	case expFloat64:
 		n2 := n.(expFloat64)
 		r := n2.val * f.val
-		return FitFloat64(r, f.exp+n2.exp)
+		return fitFloat64(r, f.exp+n2.exp)
 	}
 	panic("invalid type")
 }
@@ -136,11 +145,11 @@ func (f expFloat64) Div(n Number) Number {
 	case Float64:
 		n2 := n.(Float64)
 		r := f.val / float64(n2)
-		return FitFloat64(r, f.exp)
+		return fitFloat64(r, f.exp)
 	case expFloat64:
 		n2 := n.(expFloat64)
 		r := f.val / n2.val
-		return FitFloat64(r, f.exp-n2.exp)
+		return fitFloat64(r, f.exp-n2.exp)
 	}
 	panic("invalid type")
 }

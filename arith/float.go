@@ -36,7 +36,7 @@ func (f Float64) Mul(n Number) Number {
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(f * n2)
-		return FitFloat64(r, 0)
+		return fitFloat64(r, 0)
 	case expFloat64:
 		return n.Mul(f)
 	}
@@ -50,11 +50,11 @@ func (f Float64) Div(n Number) Number {
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(f / n2)
-		return FitFloat64(r, 0)
+		return fitFloat64(r, 0)
 	case expFloat64:
 		n2 := n.(expFloat64)
 		r := float64(f) / n2.val
-		return FitFloat64(r, -n2.exp)
+		return fitFloat64(r, -n2.exp)
 	}
 	panic("invalid type")
 }

@@ -112,7 +112,7 @@ func (o *OtNumber) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func FitFloat64(r float64, exp int32) Number {
+func fitFloat64(r float64, exp int32) Number {
 	unitNum := int32(math.Log10(r) / math.Log10(1e-4))
 
 	if unitNum >= 1 {
