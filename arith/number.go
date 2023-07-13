@@ -5,22 +5,33 @@ import (
 )
 
 type Number interface {
+	// Add receiver + param = r return r, receiver and param are not changed
 	Add(number Number) Number
+	// Sub receiver - param = r return r, receiver and param are not changed
 	Sub(number Number) Number
+	// Mul receiver * param = r return r, receiver and param are not changed
 	Mul(number Number) Number
+	// Div receiver / param = r return r, receiver and param are not changed
 	Div(number Number) Number
+	// Neg return -receiver, receiver is not changed
 	Neg() Number
+	// Abs return |receiver|, receiver is not changed
 	Abs() Number
+	// Max return max(n, a, b, c...), receiver and params not changed
 	Max(...Number) Number
+	// Min return max(n, a, b, c...), receiver and params not changed
 	Min(...Number) Number
-
-	// Cmp -1 this < param, 0 this = param, 1 this > param
+	// Cmp -1: receiver < param, 0: receiver = param, 1: receiver > param
 	Cmp(Number) int
+	// Pow power(receiver, param) = r return r, receiver and param are not changed
 	Pow(number Number) Number
+	// Atan arctan(receiver) = r return r, receiver is not changed
 	Atan() Number
-
+	// String return string format of receiver as precise as possible
 	String() string
-	FormatFloat(precison int32) string
+	// FormatFloat return string format of receiver given precision, 1.2345 precision 2 is 1.23
+	FormatFloat(precision int32) string
+	// Float64 return float64 format, precision refer to golang float64 implement
 	Float64() float64
 }
 
