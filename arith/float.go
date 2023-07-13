@@ -116,3 +116,9 @@ func (f Float64) Pow(number Number) Number {
 func (f Float64) Atan() Number {
 	return Float64(math.Atan(float64(f)))
 }
+
+func (f Float64) Round(precision int32) Number {
+	v := math.Round(float64(f) * math.Pow(10, float64(precision)))
+	// val * 10 ** exp -> val * 10 ** (exp + precision) * 10 ** (-precision)
+	return fitFloat64(v, -precision)
+}

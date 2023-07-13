@@ -33,6 +33,8 @@ type Number interface {
 	FormatFloat(precision int32) string
 	// Float64 return float64 format, precision refer to golang float64 implement
 	Float64() float64
+	// Round return number given precision
+	Round(precison int32) Number
 }
 
 // OtNumber wrapper different Number type
@@ -104,6 +106,9 @@ func (o OtNumber) FormatFloat(precison int32) string {
 func (o OtNumber) Float64() float64 {
 	return (o.n).Float64()
 }
+func (o OtNumber) Round(precison int32) Number {
+	return (o.n).Round(precison)
+}
 
 // JSON marshal
 func (o OtNumber) MarshalJSON() ([]byte, error) {
@@ -123,25 +128,21 @@ func (o *OtNumber) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func fitFloat64(r float64, exp int32) Number {
-	unitNum := int32(math.Log10(r) / math.Log10(1e-4))
-
-	if unitNum >= 1 {
-		if -ExpUnit*unitNum+exp == 0 {
-			return Float64(r * math.Pow(10, ExpUnit*float64(unitNum)))
-		}
-		return expFloat64{
-			val: r * math.Pow(10, ExpUnit*float64(unitNum)),
-			exp: -ExpUnit*unitNum + exp,
-		}
-	} else if unitNum < -2 {
-		if ExpUnit*unitNum+exp == 0 {
-			return Float64(r / math.Pow(10, ExpUnit*float64(unitNum)))
-		}
-		return expFloat64{
-			val: r / math.Pow(10, ExpUnit*float64(unitNum)),
-			exp: ExpUnit*unitNum + exp,
-		}
+func fitFloat64(v float64, exp int32) Number {
+	rebaseExp := exp / ExpUnit * ExpUnit
+	if v < 1 && rebaseExp > exp {
+		rebaseExp -= ExpUnit
+	} else if v > 1e4 && rebaseExp < exp {
+		rebaseExp += ExpUnit
 	}
-	return Float64(r)
+	logV := math.Log10(math.Abs(v)) + float64(exp-rebaseExp)
+	unitNum := int32(math.Ceil(logV / -ExpUnit))
+	if -ExpUnit*unitNum+rebaseExp == ExpUnit || -ExpUnit*unitNum+rebaseExp == 0 {
+		return Float64(v * math.Pow(10, float64(exp-rebaseExp)) * math.Pow(10, float64(rebaseExp)))
+	}
+	r := expFloat64{
+		val: v * math.Pow(10, float64(exp-rebaseExp)) * math.Pow(10, ExpUnit*float64(unitNum)),
+		exp: -ExpUnit*unitNum + rebaseExp,
+	}
+	return r
 }

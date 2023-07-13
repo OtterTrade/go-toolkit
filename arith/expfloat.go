@@ -101,11 +101,11 @@ func (f expFloat64) Add(n Number) Number {
 		if alignExp < n2.exp {
 			v2 *= math.Pow(10, float64(-alignExp+n2.exp))
 		}
-		z := expFloat64{
+		r := expFloat64{
 			exp: alignExp,
 			val: v1 + v2,
 		}
-		return z
+		return r
 	}
 	panic("invalid type")
 }
@@ -187,4 +187,11 @@ func (f expFloat64) Pow(number Number) Number {
 
 func (f expFloat64) Atan() Number {
 	return Float64(math.Atan(f.Float64()))
+}
+
+func (f expFloat64) Round(precision int32) Number {
+	exp := f.exp + precision
+	v := math.Round(math.Pow(10, float64(exp)) * f.val)
+	// val * 10 ** exp -> val * 10 ** (exp + precision) * 10 ** (-precision)
+	return fitFloat64(v, -precision)
 }
