@@ -1,8 +1,9 @@
 package arith
 
 import (
-	"github.com/shopspring/decimal"
 	"math"
+
+	"github.com/shopspring/decimal"
 )
 
 const ExpUnit = 4
@@ -10,7 +11,7 @@ const ExpUnit = 4
 var SmallBoarder = 0.0001
 var LargeBoarder = 1e15
 
-// expFloat64 number = val * 10 ^ exp, inner implement, not used by user
+// expFloat64 number = val * 10 ^ exp, inner implement, not used by user, precision is also limited by float64
 type expFloat64 struct {
 	val float64
 	exp int32
@@ -18,8 +19,10 @@ type expFloat64 struct {
 
 func (f expFloat64) Cmp(n Number) int {
 	switch n.(type) {
+	case decimalNumber:
+		return -n.Cmp(f)
 	case OtNumber:
-		return f.Cmp(n.(OtNumber).n)
+		return f.Cmp(n.(OtNumber).Number)
 	case Float64:
 		n2 := n.Float64() * math.Pow(10, -float64(f.exp))
 		if f.val < n2 {
@@ -83,8 +86,10 @@ func (f *expFloat64) UnmarshalJSON(bytes []byte) error {
 
 func (f expFloat64) Add(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		return n.Add(f)
 	case OtNumber:
-		return f.Add(n.(OtNumber).n)
+		return f.Add(n.(OtNumber).Number)
 	case Float64:
 		return f.Add(expFloat64{exp: 0, val: float64(n.(Float64))})
 	case expFloat64:
@@ -124,8 +129,10 @@ func (f expFloat64) Abs() Number {
 
 func (f expFloat64) Mul(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		return n.Mul(f)
 	case OtNumber:
-		return f.Mul(n.(OtNumber).n)
+		return f.Mul(n.(OtNumber).Number)
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(n2) * f.val
@@ -140,8 +147,13 @@ func (f expFloat64) Mul(n Number) Number {
 
 func (f expFloat64) Div(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		d := decimalNumber{}
+		d.Decimal = decimal.NewFromFloat(f.val)
+		d.Decimal = d.Decimal.Shift(f.exp)
+		return d.Div(n)
 	case OtNumber:
-		return f.Div(n.(OtNumber).n)
+		return f.Div(n.(OtNumber).Number)
 	case Float64:
 		n2 := n.(Float64)
 		r := f.val / float64(n2)
