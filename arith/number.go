@@ -1,7 +1,10 @@
 package arith
 
 import (
+	"errors"
 	"math"
+
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 type Number interface {
@@ -37,9 +40,9 @@ type Number interface {
 	Round(precison int32) Number
 }
 
-// OtNumber wrapper different Number type
+// OtNumber wrapper different Number type, valid digit number is 16 because use float64 type
 type OtNumber struct {
-	n Number
+	Number
 }
 
 func OtNumberFromString(s string) OtNumber {
@@ -51,66 +54,7 @@ func OtNumberFromString(s string) OtNumber {
 	return *o
 }
 
-func (o OtNumber) Add(n Number) Number {
-	return (o.n).Add(n)
-}
-
-func (o OtNumber) Sub(n Number) Number {
-	return (o.n).Sub(n)
-}
-
-func (o OtNumber) Mul(n Number) Number {
-	return (o.n).Mul(n)
-}
-
-func (o OtNumber) Div(n Number) Number {
-	return (o.n).Mul(n)
-}
-
-func (o OtNumber) Neg() Number {
-	return (o.n).Neg()
-}
-
-func (o OtNumber) Abs() Number {
-	return o.n.Abs()
-}
-
-func (o OtNumber) Max(ns ...Number) Number {
-	return o.n.Max(ns...)
-}
-
-func (o OtNumber) Min(ns ...Number) Number {
-	return o.n.Min(ns...)
-}
-
-func (o OtNumber) Cmp(n Number) int {
-	return (o.n).Cmp(n)
-}
-
-func (o OtNumber) Pow(n Number) Number {
-	return (o.n).Pow(n)
-}
-
-func (o OtNumber) Atan() Number {
-	return (o.n).Atan()
-}
-
-func (o OtNumber) String() string {
-	return (o.n).String()
-}
-
-func (o OtNumber) FormatFloat(precison int32) string {
-	return (o.n).FormatFloat(precison)
-}
-
-func (o OtNumber) Float64() float64 {
-	return (o.n).Float64()
-}
-func (o OtNumber) Round(precison int32) Number {
-	return (o.n).Round(precison)
-}
-
-// JSON marshal
+// MarshalJSON JSON marshal
 func (o OtNumber) MarshalJSON() ([]byte, error) {
 	return []byte(o.String()), nil
 }
@@ -121,11 +65,25 @@ func (o *OtNumber) UnmarshalJSON(bytes []byte) error {
 		return err
 	}
 	if v.exp == 0 {
-		o.n = Float64(v.val)
+		o.Number = Float64(v.val)
 	} else {
-		o.n = v
+		o.Number = v
 	}
 	return nil
+}
+
+// MarshalBSONValue implement OtNumber mongodb marshal
+func (o *OtNumber) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	d, err := o.MarshalJSON()
+	return bsontype.String, d, err
+}
+
+// UnmarshalBSONValue implement OtNumber mongodb unmarshal
+func (o *OtNumber) UnmarshalBSONValue(ty bsontype.Type, data []byte) error {
+	if ty == bsontype.String {
+		return o.UnmarshalJSON(data)
+	}
+	return errors.New("OtNumber Unmarshal must be type string")
 }
 
 func fitFloat64(v float64, exp int32) Number {
