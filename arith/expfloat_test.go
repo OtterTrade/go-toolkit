@@ -184,7 +184,7 @@ func Test_expFloat64_FormatFloat(t *testing.T) {
 			args: args{
 				precison: 2,
 			},
-			want: "0.01",
+			want: "0.00",
 		},
 	}
 	for _, tt := range tests {
@@ -304,35 +304,6 @@ func Test_expFloat64_Float64(t *testing.T) {
 	}
 }
 
-func Test_expFloat64_FormatFloat1(t *testing.T) {
-	type fields struct {
-		val float64
-		exp int32
-	}
-	type args struct {
-		precison int32
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := expFloat64{
-				val: tt.fields.val,
-				exp: tt.fields.exp,
-			}
-			if got := f.FormatFloat(tt.args.precison); got != tt.want {
-				t.Errorf("FormatFloat() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_expFloat64_MarshalJSON(t *testing.T) {
 	type fields struct {
 		val float64
@@ -438,10 +409,10 @@ func Test_expFloat64_Mul(t *testing.T) {
 		{
 			name: "1",
 			fields: fields{
-				s: "10000.012",
+				s: "43000.14",
 			},
 			args: args{
-				s: "0.01",
+				s: "3",
 			},
 		},
 		{
@@ -459,16 +430,25 @@ func Test_expFloat64_Mul(t *testing.T) {
 				s: "-0.000000000000001",
 			},
 			args: args{
-				s: "1.0000021342",
+				s: "1.21342",
 			},
 		},
 		{
 			name: "4",
 			fields: fields{
-				s: "124314148.123",
+				s: "124314148.1",
 			},
 			args: args{
-				s: "36995.2",
+				s: "36995.",
+			},
+		},
+		{
+			name: "5",
+			fields: fields{
+				s: "-12141.2",
+			},
+			args: args{
+				s: "21.2",
 			},
 		},
 	}

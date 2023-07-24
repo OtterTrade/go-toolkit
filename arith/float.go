@@ -3,6 +3,8 @@ package arith
 import (
 	"math"
 	"strconv"
+
+	"github.com/shopspring/decimal"
 )
 
 type Float64 float64
@@ -15,8 +17,10 @@ func (f Float64) Abs() Number {
 }
 func (f Float64) Add(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		return n.Add(f)
 	case OtNumber:
-		return f.Add(n.(OtNumber).n)
+		return f.Add(n.(OtNumber).Number)
 	case Float64:
 		return f + n.(Float64)
 	case expFloat64:
@@ -31,8 +35,10 @@ func (f Float64) Sub(n Number) Number {
 
 func (f Float64) Mul(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		return n.Mul(f)
 	case OtNumber:
-		return f.Mul(n.(OtNumber).n)
+		return f.Mul(n.(OtNumber).Number)
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(f * n2)
@@ -45,8 +51,12 @@ func (f Float64) Mul(n Number) Number {
 
 func (f Float64) Div(n Number) Number {
 	switch n.(type) {
+	case decimalNumber:
+		d := decimalNumber{}
+		d.Decimal = decimal.NewFromFloat(f.Float64())
+		return d.Div(n)
 	case OtNumber:
-		return f.Div(n.(OtNumber).n)
+		return f.Div(n.(OtNumber).Number)
 	case Float64:
 		n2 := n.(Float64)
 		r := float64(f / n2)
@@ -73,8 +83,10 @@ func (f Float64) Float64() float64 {
 
 func (f Float64) Cmp(n Number) int {
 	switch n.(type) {
+	case decimalNumber:
+		return -n.Cmp(f)
 	case OtNumber:
-		return f.Cmp(n.(OtNumber).n)
+		return f.Cmp(n.(OtNumber).Number)
 	case Float64:
 		if f < n.(Float64) {
 			return -1
