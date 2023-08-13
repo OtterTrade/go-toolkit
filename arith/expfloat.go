@@ -64,6 +64,9 @@ func (f expFloat64) MarshalJSON() ([]byte, error) {
 
 func (f *expFloat64) UnmarshalJSON(bytes []byte) error {
 	s := string(bytes)
+	if s[0] == '"' && s[len(s)-1] == '"' {
+		s = s[1 : len(s)-1]
+	}
 	v, err := decimal.NewFromString(s)
 	if err != nil {
 		return err
