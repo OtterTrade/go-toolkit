@@ -54,6 +54,15 @@ func OtNumberFromString(s string) OtNumber {
 	return *o
 }
 
+// ToOtNumber only valid method to get OtNumber type from Number
+func ToOtNumber(n Number) OtNumber {
+	switch n.(type) {
+	case OtNumber:
+		return n.(OtNumber)
+	}
+	return OtNumber{n}
+}
+
 // MarshalJSON JSON marshal
 func (o OtNumber) MarshalJSON() ([]byte, error) {
 	return []byte(o.String()), nil

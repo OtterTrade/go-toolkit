@@ -320,3 +320,83 @@ func Test_Marshal_Unmarshal(t *testing.T) {
 	}
 
 }
+
+func TestOtNumber_UnmarshalJSON(t *testing.T) {
+	type fields struct {
+		Number OtNumber `json:"number"`
+	}
+	type args struct {
+		bytes []byte
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "1",
+			fields: fields{
+				Number: OtNumberFromString("0.0000000000000000000001234"),
+			},
+			args: args{
+				bytes: []byte("{\"number\": \"0.0000000000000000000001234\"}"),
+			},
+			wantErr: false,
+		},
+		{
+			name: "2",
+			fields: fields{
+				Number: OtNumberFromString("0.0000000000000000000001234"),
+			},
+			args: args{
+				bytes: []byte("{\"number\": 0.0000000000000000000001234}"),
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := fields{}
+			err := json.Unmarshal(tt.args.bytes, &o)
+			if (err != nil) != tt.wantErr || o != tt.fields {
+				t.Errorf("UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestOtNumber_UnmarshalJSON1(t *testing.T) {
+	type fields struct {
+		b string
+	}
+	type args struct {
+		N OtNumber
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "1",
+			fields: fields{
+				b: "{\"N\":0.0000000000000000000001234}",
+			},
+			args: args{
+				N: OtNumberFromString("0.0000000000000000000001234"),
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o, err := json.Marshal(tt.args)
+			s := string(o)
+			if (err != nil) != tt.wantErr || s != tt.fields.b {
+				t.Errorf("UnmarshalJSON() error = %v, wantErr %v %s %s", err, tt.wantErr, s, tt.fields.b)
+			}
+		})
+	}
+}
