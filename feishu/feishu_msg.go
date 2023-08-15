@@ -1,11 +1,12 @@
-package feishumsg
+package feishu
 
 /*
 example:
 API_URL string = "https://open.feishu.cn/open-apis/bot/v2/hook/74fe8f5b-e77e-4547-b994-xxxxxxxxxxxx"
-feishumsg.SendMsg(API_URL, 0, "welcome to feishu group")
-feishumsg.SendMsg(API_URL, 1, "请留意告警")
-feishumsg.SendMsg(API_URL, 2, "发生严重错误")
+fmsg := feishu.NewFeishuMsg(API_URL)
+fmsg.Info("welcome to feishu group")
+fmsg.Warn("请留意告警")
+fmsg.Error("发生严重错误")
 */
 
 import (
@@ -14,7 +15,17 @@ import (
 	"strings"
 )
 
-func SendTxtMsg(api_url string, msg string) {
+type FeishuMsg struct {
+	api_url string
+}
+
+func NewFeishuMsg(api_url string) *FeishuMsg {
+	p := new(FeishuMsg)
+	p.api_url = api_url
+	return p
+}
+
+func (fsm FeishuMsg) SendTxtMsg(msg string) {
 	// json
 	contentType := "application/json"
 
@@ -25,7 +36,7 @@ func SendTxtMsg(api_url string, msg string) {
 	}`
 
 	// request
-	result, err := http.Post(api_url, contentType, strings.NewReader(sendData))
+	result, err := http.Post(fsm.api_url, contentType, strings.NewReader(sendData))
 	if err != nil {
 		fmt.Printf("post failed, err:%v\n", err)
 		return
@@ -33,7 +44,7 @@ func SendTxtMsg(api_url string, msg string) {
 	defer result.Body.Close()
 }
 
-func SendMsg(api_url string, lvl int, msg string) {
+func (fsm FeishuMsg) SendMsg(lvl int, msg string) {
 	// json
 	contentType := "application/json"
 
@@ -73,7 +84,7 @@ func SendMsg(api_url string, lvl int, msg string) {
    }`
 
 	// request
-	result, err := http.Post(api_url, contentType, strings.NewReader(sendData))
+	result, err := http.Post(fsm.api_url, contentType, strings.NewReader(sendData))
 	if err != nil {
 		fmt.Printf("post failed, err:%v\n", err)
 		return
@@ -82,14 +93,14 @@ func SendMsg(api_url string, lvl int, msg string) {
 
 }
 
-func Info(api_url string, msg string) {
-	SendMsg(api_url, 0, msg)
+func (fsm FeishuMsg) Info(msg string) {
+	fsm.SendMsg(0, msg)
 }
 
-func Warn(api_url string, msg string) {
-	SendMsg(api_url, 1, msg)
+func (fsm FeishuMsg) Warn(msg string) {
+	fsm.SendMsg(1, msg)
 }
 
-func Error(api_url string, msg string) {
-	SendMsg(api_url, 2, msg)
+func (fsm FeishuMsg) Error(msg string) {
+	fsm.SendMsg(2, msg)
 }
