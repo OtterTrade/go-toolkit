@@ -12,9 +12,9 @@ func SendMsg(api_url string, msg string) {
 
 	// data
 	sendData := `{
-    "msg_type": "text",
-    "content": {"text": "` + "消息通知: " + msg + `"}
-   }`
+		"msg_type": "text",
+		"content": {"text": "` + "消息通知: " + msg + `"}
+	}`
 
 	// request
 	result, err := http.Post(api_url, contentType, strings.NewReader(sendData))
