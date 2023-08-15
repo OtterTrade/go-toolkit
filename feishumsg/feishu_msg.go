@@ -1,12 +1,20 @@
 package feishumsg
 
+/*
+example:
+API_URL string = "https://open.feishu.cn/open-apis/bot/v2/hook/74fe8f5b-e77e-4547-b994-xxxxxxxxxxxx"
+feishumsg.SendMsg(API_URL, 0, "welcome to feishu group")
+feishumsg.SendMsg(API_URL, 1, "请留意告警")
+feishumsg.SendMsg(API_URL, 2, "发生严重错误")
+*/
+
 import (
 	"fmt"
 	"net/http"
 	"strings"
 )
 
-func SendMsg(api_url string, msg string) {
+func SendTxtMsg(api_url string, msg string) {
 	// json
 	contentType := "application/json"
 
@@ -23,4 +31,65 @@ func SendMsg(api_url string, msg string) {
 		return
 	}
 	defer result.Body.Close()
+}
+
+func SendMsg(api_url string, lvl int, msg string) {
+	// json
+	contentType := "application/json"
+
+	// color and content
+	var color = "blue"
+	var content = "提示消息"
+	if lvl == 1 {
+		color = "yellow"
+		content = "告警消息"
+	} else if lvl == 2 {
+		color = "red"
+		content = "错误消息"
+	}
+
+	sendData := `{
+      "msg_type": "interactive",
+      "card": {
+         "config": {
+            "wide_screen_mode": true
+         },
+         "header": {
+            "title": {
+               "tag": "plain_text",
+               "content": "` + content + `"
+            },
+            "template": "` + color + `"
+         },
+         "elements": [{
+            "tag": "div",
+            "text": {
+                "tag": "lark_md",
+                "content": "` + msg + `"
+            }
+         }]
+
+      }
+   }`
+
+	// request
+	result, err := http.Post(api_url, contentType, strings.NewReader(sendData))
+	if err != nil {
+		fmt.Printf("post failed, err:%v\n", err)
+		return
+	}
+	defer result.Body.Close()
+
+}
+
+func Info(api_url string, msg string) {
+	SendMsg(api_url, 0, msg)
+}
+
+func Warn(api_url string, msg string) {
+	SendMsg(api_url, 1, msg)
+}
+
+func Error(api_url string, msg string) {
+	SendMsg(api_url, 2, msg)
 }
