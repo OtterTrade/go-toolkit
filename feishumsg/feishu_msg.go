@@ -1,5 +1,13 @@
 package feishumsg
 
+/*
+example:
+API_URL string = "https://open.feishu.cn/open-apis/bot/v2/hook/74fe8f5b-e77e-4547-b994-xxxxxxxxxxxx"
+feishumsg.SendMsg(API_URL, 0, "welcome to feishu group")
+feishumsg.SendMsg(API_URL, 1, "请留意告警")
+feishumsg.SendMsg(API_URL, 2, "发生严重错误")
+*/
+
 import (
 	"fmt"
 	"net/http"
@@ -28,8 +36,8 @@ func SendTxtMsg(api_url string, msg string) {
 func SendMsg(api_url string, lvl int, msg string) {
 	// json
 	contentType := "application/json"
-   
-   // color and content
+
+	// color and content
 	var color = "blue"
 	var content = "提示消息"
 	if lvl == 1 {
@@ -39,7 +47,7 @@ func SendMsg(api_url string, lvl int, msg string) {
 		color = "red"
 		content = "错误消息"
 	}
-   
+
 	sendData := `{
       "msg_type": "interactive",
       "card": {
